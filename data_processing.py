@@ -93,28 +93,22 @@ def create_balanced_dataset(examples, target_total=10000, min_per_language=800, 
 def main():
     data_dir = "MMedBench"
     train_dir = os.path.join(data_dir, "Train")
-    test_dir = os.path.join(data_dir, "Test")
     languages = ["Chinese", "English", "French", "Japanese", "Russian", "Spanish"]
     output_path = "HF_data_balanced"
     
     print("Loading training data...")
     train_examples = load_jsonl_files(train_dir, languages)
-    
-    print("Loading test data...")
-    test_examples = load_jsonl_files(test_dir, languages)
-    
-    all_examples = train_examples + test_examples
-    print(f"Total examples loaded: {len(all_examples)}")
+    print(f"Total examples loaded: {len(train_examples)}")
     
     print("Creating balanced dataset...")
-    train_split, test_split = create_balanced_dataset(all_examples)
+    train_split, val_split = create_balanced_dataset(train_examples)
     
     print(f"Train: {len(train_split)}")
-    print(f"Test: {len(test_split)}")
+    print(f"Validation: {len(val_split)}")
     
     dataset = DatasetDict({
         'train': Dataset.from_list(train_split),
-        'test': Dataset.from_list(test_split)
+        'test': Dataset.from_list(val_split)
     })
     
     dataset.save_to_disk(output_path)
