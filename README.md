@@ -4,12 +4,53 @@ This repository contains code for training and evaluating multilingual BERT mode
 
 ## Overview
 
-The project consists of three main components:
-1. **Training script** (`train_bert.py`) - Fine-tunes BERT models on MMedBench training data
-2. **Evaluation script** (`eval_mmedbench_test_v2.py`) - Evaluates fine-tuned models on test data
-3. **Baseline evaluation notebook** (`mmedbench_model_baseline_eval.ipynb`) - Evaluates pre-trained baseline models without fine-tuning
+The project consists of four main components:
+1. **Data processing script** (`data_processing.py`) - Preprocesses MMedBench training data into a HuggingFace dataset
+2. **Training script** (`train_bert.py`) - Fine-tunes BERT models on MMedBench training data
+3. **Evaluation script** (`eval_mmedbench_test_v2.py`) - Evaluates fine-tuned models on test data
+4. **Baseline evaluation notebook** (`mmedbench_model_baseline_eval.ipynb`) - Evaluates pre-trained baseline models without fine-tuning
 
 ## Files
+
+### `data_processing.py`
+
+A Python script for preprocessing MMedBench training data into a HuggingFace dataset.
+
+#### Features
+- Loads JSONL files from the MMedBench training directory for all supported languages
+- Normalizes data format (handles both dict and list formats for options)
+- Creates a balanced dataset with proportional sampling across languages
+- Splits data into train/validation sets (80/20 split)
+- Saves processed dataset in HuggingFace format for use with training scripts
+
+#### Processing Steps
+1. **Data Loading**: Loads JSONL files from `MMedBench/Train/` for each language
+2. **Format Normalization**:
+   - Converts dictionary-based options to sorted lists (A, B, C, D, E)
+   - Handles list-based options directly
+   - Converts answer indices (A-E) to numeric labels (0-4)
+3. **Filtering**: Filters out examples without valid `answer_idx`
+4. **Balanced Sampling**: Creates a balanced dataset with:
+   - Target total of 10,000 examples (configurable)
+   - Minimum of 800 examples per language (configurable)
+   - Proportional sampling for remaining examples based on language distribution
+5. **Train/Validation Split**: Splits sampled data 80/20 for training and validation
+
+#### Usage
+```bash
+python data_processing.py
+```
+
+The script expects:
+- `MMedBench/Train/` directory containing JSONL files (Chinese.jsonl, English.jsonl, etc.)
+- Outputs to `HF_data_balanced/` directory (configurable in script)
+
+#### Output
+- Processed dataset saved to: `HF_data_balanced/`
+- Dataset contains `train` and `test` splits (test is used as validation)
+- Each example includes: `question`, `options`, `answer`, `answer_idx`, `label`, `language`
+
+---
 
 ### `train_bert.py`
 
